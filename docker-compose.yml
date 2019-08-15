@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    hostname: db
+    restart: always
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./init/:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+
+  guacd:
+    hostname: guacd
+    image: guacamole/guacd
+    restart: always
+
+  guacamole:
+    image: guacamole/guacamole
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - guacd
+      - db
+    environment:
+      GUACD_HOSTNAME: guacd
+      POSTGRES_HOSTNAME: db
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+volumes:
+  data:
